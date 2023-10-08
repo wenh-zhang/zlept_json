@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/Users/zhangwenhua/VSCodeProjects/zleptjson/build",
+  "command": "/usr/bin/clang  -ansi -pedantic -Wall -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -o CMakeFiles/zleptjson.dir/zleptjson.c.o -c /Users/zhangwenhua/VSCodeProjects/zleptjson/zleptjson.c",
+  "file": "/Users/zhangwenhua/VSCodeProjects/zleptjson/zleptjson.c"
+},
+{
+  "directory": "/Users/zhangwenhua/VSCodeProjects/zleptjson/build",
+  "command": "/usr/bin/clang  -ansi -pedantic -Wall -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -o CMakeFiles/zleptjson_test.dir/test.c.o -c /Users/zhangwenhua/VSCodeProjects/zleptjson/test.c",
+  "file": "/Users/zhangwenhua/VSCodeProjects/zleptjson/test.c"
+}
+]

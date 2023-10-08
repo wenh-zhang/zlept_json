@@ -1,0 +1,4 @@
+/Users/zhangwenhua/VSCodeProjects/zleptjson/build/CMakeFiles/zleptjson.dir
+/Users/zhangwenhua/VSCodeProjects/zleptjson/build/CMakeFiles/zleptjson_test.dir
+/Users/zhangwenhua/VSCodeProjects/zleptjson/build/CMakeFiles/edit_cache.dir
+/Users/zhangwenhua/VSCodeProjects/zleptjson/build/CMakeFiles/rebuild_cache.dir

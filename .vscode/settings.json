@@ -1,0 +1,25 @@
+{
+    "CppHelper.SourcePattern": [
+        "{FILE}.cpp",
+        "{FILE}.c",
+        "{FILE}.h",
+        "/src/{FILE}.cpp"
+    ],
+    "CppHelper.HeaderGuardPattern": "__{FILE}_H__",
+    "files.associations": {
+        "iterator": "cpp",
+        "list": "cpp",
+        "memory_resource": "cpp",
+        "locale": "cpp",
+        "ios": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "iostream": "cpp",
+        "algorithm": "cpp",
+        "any": "c",
+        "filesystem": "c",
+        "zleptjson.h": "c"
+    },
+    "C_Cpp.clang_format_style": "{ BasedOnStyle: Google}",
+    "C_Cpp.errorSquiggles": "enabled"
+}

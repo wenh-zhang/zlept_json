@@ -11,3 +11,5 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 add_executable(zleptjson_test test.c)
 
 target_link_libraries(zleptjson_test zleptjson)
+
+target_compile_options(zleptjson PRIVATE -Wno-c11-extensions)

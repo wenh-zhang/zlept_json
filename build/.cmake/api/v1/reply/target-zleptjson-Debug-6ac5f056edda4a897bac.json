@@ -11,7 +11,8 @@
 	{
 		"commands" : 
 		[
-			"add_library"
+			"add_library",
+			"target_compile_options"
 		],
 		"files" : 
 		[
@@ -27,6 +28,12 @@
 				"file" : 0,
 				"line" : 8,
 				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 15,
+				"parent" : 0
 			}
 		]
 	},
@@ -37,6 +44,10 @@
 			[
 				{
 					"fragment" : " -ansi -pedantic -Wall -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk"
+				},
+				{
+					"backtrace" : 2,
+					"fragment" : "-Wno-c11-extensions"
 				}
 			],
 			"language" : "C",

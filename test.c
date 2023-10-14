@@ -24,34 +24,45 @@ static int test_pass = 0;
   EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%d")
 #define EXPECT_EQ_DOUBLE(expect, actual) \
   EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%.17g")
+#define EXPECT_EQ_STRING(expect, actual, alength)                              \
+  EXPECT_EQ_BASE(                                                              \
+      sizeof(expect) - 1 == (alength) && memcmp(expect, actual, alength) == 0, \
+      expect, actual, "%s")
+#define EXPECT_TRUE(actual) EXPECT_EQ_BASE((actual) != 0, "true", "false", "%s")
+#define EXPECT_FALSE(actual) \
+  EXPECT_EQ_BASE((actual) == 0, "false", "true", "%s")
 
 static void test_parse_null() {
   zlept_value v;
-  v.type = ZLEPT_FALSE;
+  zlept_init(&v);
+  zlept_set_boolean(&v, 0);
   EXPECT_EQ_INT(ZLEPT_PARSE_OK, zlept_parse(&v, "null"));
   EXPECT_EQ_INT(ZLEPT_NULL, zlept_get_type(&v));
 }
 
 static void test_parse_true() {
   zlept_value v;
-  v.type = ZLEPT_FALSE;
+  zlept_init(&v);
+  zlept_set_boolean(&v, 0);
   EXPECT_EQ_INT(ZLEPT_PARSE_OK, zlept_parse(&v, "true"));
   EXPECT_EQ_INT(ZLEPT_TRUE, zlept_get_type(&v));
 }
 
 static void test_parse_false() {
   zlept_value v;
-  v.type = ZLEPT_TRUE;
+  zlept_init(&v);
+  zlept_set_boolean(&v, 1);
   EXPECT_EQ_INT(ZLEPT_PARSE_OK, zlept_parse(&v, "false"));
   EXPECT_EQ_INT(ZLEPT_FALSE, zlept_get_type(&v));
 }
 
-#define TEST_NUMBER(expect, json)                       \
-  do {                                                  \
-    zlept_value v;                                       \
+#define TEST_NUMBER(expect, json)                         \
+  do {                                                    \
+    zlept_value v;                                        \
+    zlept_init(&v);                                        \
     EXPECT_EQ_INT(ZLEPT_PARSE_OK, zlept_parse(&v, json)); \
     EXPECT_EQ_INT(ZLEPT_NUMBER, zlept_get_type(&v));      \
-    EXPECT_EQ_DOUBLE(expect, zlept_get_number(&v));      \
+    EXPECT_EQ_DOUBLE(expect, zlept_get_number(&v));       \
   } while (0)
 
 static void test_parse_number() {
@@ -74,13 +85,47 @@ static void test_parse_number() {
   TEST_NUMBER(1.234E+10, "1.234E+10");
   TEST_NUMBER(1.234E-10, "1.234E-10");
   TEST_NUMBER(0.0, "1e-10000"); /* must underflow */
+
+  TEST_NUMBER(1.0000000000000002,
+              "1.0000000000000002"); /* the smallest number > 1 */
+  TEST_NUMBER(4.9406564584124654e-324,
+              "4.9406564584124654e-324"); /* minimum denormal */
+  TEST_NUMBER(-4.9406564584124654e-324, "-4.9406564584124654e-324");
+  TEST_NUMBER(2.2250738585072009e-308,
+              "2.2250738585072009e-308"); /* Max subnormal double */
+  TEST_NUMBER(-2.2250738585072009e-308, "-2.2250738585072009e-308");
+  TEST_NUMBER(2.2250738585072014e-308,
+              "2.2250738585072014e-308"); /* Min normal positive double */
+  TEST_NUMBER(-2.2250738585072014e-308, "-2.2250738585072014e-308");
+  TEST_NUMBER(1.7976931348623157e+308,
+              "1.7976931348623157e+308"); /* Max double */
+  TEST_NUMBER(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 }
 
-#define TEST_ERROR(error, json)                  \
-  do {                                           \
-    zlept_value v;                                \
-    v.type = ZLEPT_FALSE;                         \
-    EXPECT_EQ_INT(error, zlept_parse(&v, json));  \
+#define TEST_STRING(expect, json)                         \
+  do {                                                    \
+    zlept_value v;                                        \
+    zlept_init(&v);                                        \
+    EXPECT_EQ_INT(ZLEPT_PARSE_OK, zlept_parse(&v, json)); \
+    EXPECT_EQ_INT(ZLEPT_STRING, zlept_get_type(&v));      \
+    EXPECT_EQ_STRING(expect, zlept_get_string(&v),        \
+                     zlept_get_string_length(&v));        \
+  } while (0)
+
+static void test_parse_string() {
+  TEST_STRING("", "\"\"");
+  TEST_STRING("Hello", "\"Hello\"");
+  TEST_STRING("Hello\nWorld", "\"Hello\\nWorld\"");
+  TEST_STRING("\" \\ / \b \f \n \r \t",
+              "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+}
+
+#define TEST_ERROR(error, json)                    \
+  do {                                             \
+    zlept_value v;                                 \
+    zlept_init(&v);                                 \
+    zlept_set_boolean(&v, 1);                       \
+    EXPECT_EQ_INT(error, zlept_parse(&v, json));   \
     EXPECT_EQ_INT(ZLEPT_NULL, zlept_get_type(&v)); \
   } while (0)
 
@@ -98,7 +143,8 @@ static void test_parse_invalid_value() {
   TEST_ERROR(ZLEPT_PARSE_INVALID_VALUE, "+1");
   TEST_ERROR(ZLEPT_PARSE_INVALID_VALUE,
              ".123"); /* at least one digit before '.' */
-  TEST_ERROR(ZLEPT_PARSE_INVALID_VALUE, "1."); /* at least one digit after '.' */
+  TEST_ERROR(ZLEPT_PARSE_INVALID_VALUE,
+             "1."); /* at least one digit after '.' */
   TEST_ERROR(ZLEPT_PARSE_INVALID_VALUE, "INF");
   TEST_ERROR(ZLEPT_PARSE_INVALID_VALUE, "inf");
   TEST_ERROR(ZLEPT_PARSE_INVALID_VALUE, "NAN");
@@ -107,6 +153,12 @@ static void test_parse_invalid_value() {
 
 static void test_parse_root_not_singular() {
   TEST_ERROR(ZLEPT_PARSE_ROOT_NOT_SINGULAR, "null x");
+
+  /* invalid number */
+  TEST_ERROR(ZLEPT_PARSE_ROOT_NOT_SINGULAR,
+             "0123"); /* after zero should be '.' or nothing */
+  TEST_ERROR(ZLEPT_PARSE_ROOT_NOT_SINGULAR, "0x0");
+  TEST_ERROR(ZLEPT_PARSE_ROOT_NOT_SINGULAR, "0x123");
 }
 
 static void test_parse_number_too_big() {
@@ -114,15 +166,77 @@ static void test_parse_number_too_big() {
   TEST_ERROR(ZLEPT_PARSE_NUMBER_TOO_BIG, "-1e309");
 }
 
+static void test_parse_missing_quotation_mark() {
+  TEST_ERROR(ZLEPT_PARSE_MISS_QUOTATION_MARK, "\"");
+  TEST_ERROR(ZLEPT_PARSE_MISS_QUOTATION_MARK, "\"abc");
+}
+
+static void test_parse_invalid_string_escape() {
+  TEST_ERROR(ZLEPT_PARSE_INVALID_STRING_ESCAPE, "\"\\v\"");
+  TEST_ERROR(ZLEPT_PARSE_INVALID_STRING_ESCAPE, "\"\\'\"");
+  TEST_ERROR(ZLEPT_PARSE_INVALID_STRING_ESCAPE, "\"\\0\"");
+  TEST_ERROR(ZLEPT_PARSE_INVALID_STRING_ESCAPE, "\"\\x12\"");
+}
+
+static void test_parse_invalid_string_char() {
+  TEST_ERROR(ZLEPT_PARSE_INVALID_STRING_CHAR, "\"\x01\"");
+  TEST_ERROR(ZLEPT_PARSE_INVALID_STRING_CHAR, "\"\x1F\"");
+}
+
+static void test_access_null() {
+  zlept_value v;
+  zlept_init(&v);
+  zlept_set_string(&v, "a", 1);
+  zlept_set_null(&v);
+  EXPECT_EQ_INT(ZLEPT_NULL, zlept_get_type(&v));
+  zlept_free(&v);
+}
+
+static void test_access_boolean() {
+  zlept_value v;
+  zlept_init(&v);
+  zlept_set_boolean(&v, 1);
+  EXPECT_TRUE(zlept_get_boolean(&v));
+  zlept_set_boolean(&v, 0);
+  EXPECT_FALSE(zlept_get_boolean(&v));
+}
+
+static void test_access_number() {
+  zlept_value v;
+  zlept_init(&v);
+  zlept_set_number(&v, 4.444);
+  EXPECT_EQ_DOUBLE(4.444, zlept_get_number(&v));
+  zlept_set_number(&v, 5.09e12);
+  EXPECT_EQ_DOUBLE(5.09e12, zlept_get_number(&v));
+}
+
+static void test_access_string() {
+  zlept_value v;
+  zlept_init(&v);
+  zlept_set_string(&v, "", 0);
+  EXPECT_EQ_STRING("", zlept_get_string(&v), zlept_get_string_length(&v));
+  zlept_set_string(&v, "Hello", 5);
+  EXPECT_EQ_STRING("Hello", zlept_get_string(&v), zlept_get_string_length(&v));
+  zlept_free(&v);
+}
+
 static void test_parse() {
   test_parse_null();
   test_parse_true();
   test_parse_false();
   test_parse_number();
-  test_parse_number_too_big();
+  test_parse_string();
   test_parse_expect_value();
   test_parse_invalid_value();
   test_parse_root_not_singular();
+  test_parse_number_too_big();
+  test_parse_missing_quotation_mark();
+  test_parse_invalid_string_escape();
+  test_parse_invalid_string_char();
+  test_access_null() ;
+  test_access_boolean();
+  test_access_number();
+  test_access_string();
 }
 
 int main() {

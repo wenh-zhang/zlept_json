@@ -13,8 +13,19 @@ typedef enum {
   ZLEPT_OBJECT
 } zlept_type;
 
-typedef struct {
+typedef struct zlept_value zlept_value;
+typedef struct zlept_member zlept_member ;
+
+struct zlept_value {
   union {
+    struct{
+      zlept_member* m;
+      size_t size;
+    }o; /* object */
+    struct {
+      zlept_value* e;
+      size_t size;
+    } a; /* array */
     struct 
     {
       char* s;
@@ -23,7 +34,13 @@ typedef struct {
     double n;
   }u;
   zlept_type type;
-} zlept_value;
+};
+
+struct zlept_member{
+  char* k;
+  size_t klen;
+  zlept_value v;
+};
 
 enum {
   ZLEPT_PARSE_OK = 0,
@@ -35,10 +52,17 @@ enum {
   ZLEPT_PARSE_INVALID_STRING_ESCAPE,
   ZLEPT_PARSE_INVALID_STRING_CHAR,
   ZLEPT_PARSE_INVALID_UNICODE_HEX,
-  ZLEPT_PARSE_INVALID_UNICODE_SURROGATE
+  ZLEPT_PARSE_INVALID_UNICODE_SURROGATE,
+  ZLEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET,
+  ZLEPT_PARSE_MISS_KEY,
+  ZLEPT_PARSE_MISS_COLON,
+  ZLEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET
 };
-
+/* 解析json字符串 */
 int zlept_parse(zlept_value* v, const char* json);
+/* 生成json字符串 */
+char* zlept_stringify(const zlept_value* v, size_t* length);
+
 zlept_type zlept_get_type(const zlept_value* v);
 
 #define zlept_init(v)       \
@@ -59,5 +83,12 @@ void zlept_set_number(zlept_value* v, double n);
 const char* zlept_get_string(const zlept_value* v);
 size_t zlept_get_string_length(const zlept_value* v);
 void zlept_set_string(zlept_value* v, const char* s, size_t len);
+size_t zlept_get_array_size(const zlept_value* v);
+zlept_value* zlept_get_array_element(const zlept_value* v, size_t index);
+
+size_t zlept_get_object_size(const zlept_value* v);
+const char* zlept_get_object_key(const zlept_value* v, size_t index);
+size_t zlept_get_object_key_length(const zlept_value* v, size_t index);
+zlept_value* zlept_get_object_value(const zlept_value* v, size_t index);
 
 #endif

@@ -1,8 +1,9 @@
 {
+	"archive" : {},
 	"artifacts" : 
 	[
 		{
-			"path" : "/Users/zhangwenhua/VSCodeProjects/zleptjson/bin/zleptjson_test"
+			"path" : "libzleptjson.a"
 		}
 	],
 	"backtrace" : 1,
@@ -10,8 +11,8 @@
 	{
 		"commands" : 
 		[
-			"add_executable",
-			"target_link_libraries"
+			"add_library",
+			"target_compile_options"
 		],
 		"files" : 
 		[
@@ -25,13 +26,13 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 11,
+				"line" : 10,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 13,
+				"line" : 17,
 				"parent" : 0
 			}
 		]
@@ -43,6 +44,10 @@
 			[
 				{
 					"fragment" : " -ansi -pedantic -Wall -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk"
+				},
+				{
+					"backtrace" : 2,
+					"fragment" : "-Wno-c11-extensions"
 				}
 			],
 			"language" : "C",
@@ -52,36 +57,9 @@
 			]
 		}
 	],
-	"dependencies" : 
-	[
-		{
-			"backtrace" : 2,
-			"id" : "zleptjson::@6890427a1f51a3e7e1df"
-		}
-	],
-	"id" : "zleptjson_test::@6890427a1f51a3e7e1df",
-	"link" : 
-	{
-		"commandFragments" : 
-		[
-			{
-				"fragment" : "-ansi -pedantic -Wall -g",
-				"role" : "flags"
-			},
-			{
-				"fragment" : "",
-				"role" : "flags"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "libzleptjson.a",
-				"role" : "libraries"
-			}
-		],
-		"language" : "C"
-	},
-	"name" : "zleptjson_test",
-	"nameOnDisk" : "zleptjson_test",
+	"id" : "zleptjson::@6890427a1f51a3e7e1df",
+	"name" : "zleptjson",
+	"nameOnDisk" : "libzleptjson.a",
 	"paths" : 
 	{
 		"build" : ".",
@@ -102,9 +80,9 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "test.c",
+			"path" : "zleptjson.c",
 			"sourceGroupIndex" : 0
 		}
 	],
-	"type" : "EXECUTABLE"
+	"type" : "STATIC_LIBRARY"
 }

@@ -18,7 +18,8 @@
         "algorithm": "cpp",
         "any": "c",
         "filesystem": "c",
-        "zleptjson.h": "c"
+        "zleptjson.h": "c",
+        "cstdio": "c"
     },
     "C_Cpp.clang_format_style": "{ BasedOnStyle: Google}",
     "C_Cpp.errorSquiggles": "enabled"
